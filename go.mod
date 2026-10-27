@@ -1,13 +1,13 @@
 module github.com/example/kata-egress-guard
 
-go 1.24.0
+go 1.25.0
 
 require (
-	github.com/cilium/ebpf v0.19.0
+	github.com/cilium/ebpf v0.22.0
 	github.com/prometheus/client_golang v1.22.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
-	golang.org/x/sys v0.35.0
+	golang.org/x/sys v0.43.0
 )
 
 require (
