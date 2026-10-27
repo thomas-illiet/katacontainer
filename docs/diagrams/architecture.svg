@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">kata-egress-guard architecture</title>
+  <desc id="desc">A Kubernetes node hosts a Kata VM containing the guest kernel, Pod cgroup, eBPF guard, and rootless code-server.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#334155"/></marker>
+    <style>.title{font:700 26px system-ui,sans-serif;fill:#0f172a}.label{font:600 17px system-ui,sans-serif;fill:#0f172a}.text{font:14px system-ui,sans-serif;fill:#334155}.box{stroke-width:2;rx:16}.arrow{stroke:#334155;stroke-width:2.5;fill:none;marker-end:url(#arrow)}</style>
+  </defs>
+  <rect width="1200" height="720" fill="#f8fafc"/>
+  <text x="50" y="48" class="title">Kubernetes + Kata + eBPF architecture</text>
+  <rect x="40" y="80" width="1120" height="590" fill="#e2e8f0" stroke="#64748b" class="box"/><text x="65" y="115" class="label">Kubernetes node</text>
+  <rect x="80" y="140" width="200" height="110" fill="#fff" stroke="#64748b" class="box"/><text x="115" y="180" class="label">kubelet + CRI</text><text x="105" y="210" class="text">containerd or CRI-O</text>
+  <rect x="340" y="125" width="770" height="500" fill="#eef2ff" stroke="#4f46e5" class="box"/><text x="370" y="162" class="label">Kata VM / sandbox — dedicated guest kernel</text>
+  <rect x="380" y="195" width="690" height="380" fill="#fff" stroke="#7c3aed" class="box"/><text x="405" y="230" class="label">Pod parent cgroup</text>
+  <rect x="420" y="270" width="270" height="220" fill="#ecfeff" stroke="#0891b2" class="box"/><text x="495" y="310" class="label">guard</text>
+  <text x="450" y="345" class="text">1. Validate policy</text><text x="450" y="373" class="text">2. Load programs</text><text x="450" y="401" class="text">3. Attach to cgroup</text><text x="450" y="429" class="text">4. Pin links</text><text x="450" y="457" class="text">5. Drop root privileges</text>
+  <rect x="760" y="270" width="270" height="220" fill="#f0fdf4" stroke="#16a34a" class="box"/><text x="825" y="310" class="label">code-server</text>
+  <text x="792" y="350" class="text">Non-zero UID/GID</text><text x="792" y="378" class="text">No capabilities</text><text x="792" y="406" class="text">Read-only rootfs</text><text x="792" y="434" class="text">Wait for ready signal</text>
+  <rect x="520" y="515" width="420" height="80" fill="#fefce8" stroke="#ca8a04" class="box"/><text x="560" y="548" class="label">Cgroup hooks in the guest kernel</text><text x="565" y="575" class="text">connect4/6 · sendmsg4/6 · sock_create</text>
+  <path d="M280 195 H340" class="arrow"/><path d="M690 380 H760" class="arrow"/><text x="702" y="365" class="text">ready</text><path d="M555 490 V515" class="arrow"/><path d="M895 490 V515" class="arrow"/>
+  <path d="M940 555 H1125 V350" class="arrow"/><text x="956" y="540" class="text">allowed egress</text><line x1="1110" y1="330" x2="1150" y2="370" stroke="#dc2626" stroke-width="4"/><line x1="1150" y1="330" x2="1110" y2="370" stroke="#dc2626" stroke-width="4"/><text x="1010" y="315" class="text">denied destinations</text>
+</svg>

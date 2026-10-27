@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["runtimeClassName", "policy", "codeServer", "guard"],
+  "properties": {
+    "production": {"type": "boolean"},
+    "replicaCount": {"type": "integer", "minimum": 1},
+    "runtimeClassName": {"type": "string", "minLength": 1},
+    "policy": {
+      "type": "object",
+      "required": ["egress"],
+      "properties": {
+        "egress": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["cidrs", "protocol", "ports"],
+            "properties": {
+              "cidrs": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string",
+                  "oneOf": [
+                    {"pattern": "^([0-9]{1,3}\\.){3}[0-9]{1,3}/([0-9]|[12][0-9]|3[0-2])$"},
+                    {"pattern": "^[0-9A-Fa-f:]+/([0-9]|[1-9][0-9]|1[01][0-9]|12[0-8])$"}
+                  ]
+                }
+              },
+              "protocol": {"type": "string", "enum": ["TCP", "UDP"]},
+              "ports": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 1, "maximum": 65535}}
+            }
+          }
+        }
+      }
+    },
+    "guard": {"$ref": "#/definitions/guard"},
+    "codeServer": {"$ref": "#/definitions/codeServer"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"production": {"const": true}}},
+      "then": {
+        "properties": {
+          "guard": {"properties": {"image": {"required": ["digest"], "properties": {"digest": {"pattern": "^sha256:[a-f0-9]{64}$"}}}}},
+          "codeServer": {"properties": {"image": {"required": ["digest"], "properties": {"digest": {"pattern": "^sha256:[a-f0-9]{64}$"}}}}}
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "image": {
+      "type": "object",
+      "required": ["repository"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "tag": {"type": "string"},
+        "digest": {"type": "string"},
+        "pullPolicy": {"type": "string", "enum": ["Always", "IfNotPresent", "Never"]}
+      }
+    },
+    "guard": {
+      "type": "object",
+      "required": ["image"],
+      "properties": {
+        "image": {"$ref": "#/definitions/image"},
+        "logLevel": {"type": "string", "enum": ["debug", "info", "warn", "error"]}
+      }
+    },
+    "codeServer": {
+      "type": "object",
+      "required": ["image", "existingSecret", "uid", "gid", "port"],
+      "properties": {
+        "image": {"$ref": "#/definitions/image"},
+        "existingSecret": {"type": "string", "minLength": 1},
+        "passwordKey": {"type": "string", "minLength": 1},
+        "uid": {"type": "integer", "minimum": 1},
+        "gid": {"type": "integer", "minimum": 1},
+        "port": {"type": "integer", "minimum": 1024, "maximum": 65535}
+      }
+    }
+  }
+}

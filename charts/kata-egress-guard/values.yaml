@@ -1,0 +1,65 @@
+production: false
+replicaCount: 1
+runtimeClassName: kata-qemu-runtime-rs
+
+guard:
+  logLevel: info
+  image:
+    repository: ghcr.io/example/kata-egress-guard
+    tag: latest
+    digest: ""
+    pullPolicy: IfNotPresent
+  metrics:
+    port: 9090
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 64Mi
+
+policy:
+  egress:
+    - cidrs: ["10.96.0.10/32"]
+      protocol: UDP
+      ports: [53]
+
+codeServer:
+  image:
+    repository: ghcr.io/coder/code-server
+    tag: "4.104.2"
+    digest: ""
+    pullPolicy: IfNotPresent
+  existingSecret: code-server-auth
+  passwordKey: password
+  uid: 1000
+  gid: 1000
+  port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+service:
+  type: ClusterIP
+  port: 80
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  labels: {}
+
+networkPolicy:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+podAnnotations: {}
+podLabels: {}

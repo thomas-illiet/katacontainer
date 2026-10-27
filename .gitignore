@@ -1,0 +1,5 @@
+/dist/
+/cmd/guard/kata_bpfeb.go
+/cmd/guard/kata_bpfeb.o
+/cmd/guard/kata_bpfel.go
+/cmd/guard/kata_bpfel.o

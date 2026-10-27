@@ -1,0 +1,55 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.24.x', cache: true}
+      - name: Install eBPF and Helm tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang llvm libbpf-dev linux-libc-dev
+      - uses: azure/setup-helm@v4
+      - run: go generate ./cmd/guard
+      - run: go test -race ./...
+      - run: make coverage
+      - run: helm lint charts/kata-egress-guard
+      - run: helm template test charts/kata-egress-guard > /dev/null
+      - run: docker build -t kata-egress-guard:test .
+  image:
+    if: github.event_name == 'push'
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: sigstore/cosign-installer@v3
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          provenance: true
+          sbom: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.sha }}
+      - env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: cosign sign --yes ghcr.io/${{ github.repository }}@$DIGEST

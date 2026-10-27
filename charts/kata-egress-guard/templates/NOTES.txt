@@ -1,0 +1,5 @@
+The workload is fail-closed: code-server waits for /run/kata-egress-guard/ready.
+Verify that all Pods are Ready:
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+No DNS or Kubernetes API destination is implicitly allowed. Review policy.egress before use.
